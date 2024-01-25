@@ -1,3 +1,5 @@
+import os
+
 import numpy as np
 import pandas as pd
 
@@ -193,7 +195,9 @@ def build_model():
 
 
 if __name__ == "__main__":
-    train = pd.read_csv("data/train.csv.zip")
+    data_path = os.environ.get("DATA_PATH", "data")
+
+    train = pd.read_csv(os.path.join(data_path, "train.csv.zip"))
 
     special_cols = [col for col in train.columns if train[col].dtype != np.float64]
     feature_cols = [col for col in train.columns if col not in special_cols]

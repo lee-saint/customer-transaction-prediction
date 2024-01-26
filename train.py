@@ -196,7 +196,7 @@ def build_model():
 
 if __name__ == "__main__":
     data_path = os.environ.get("DATA_PATH", "data")
-    model_path = os.environ.get("MODEL_PATH", "model_weights")
+    # model_path = os.environ.get("MODEL_PATH", "model_weights")
 
     train = pd.read_csv(os.path.join(data_path, "train.csv.zip"))
 
@@ -234,8 +234,8 @@ if __name__ == "__main__":
         val_y = target[val_ix]
 
         model = build_model()
-        file_name = f"{model_prefix}_fold_{fold}.hdf5"
-        file_path = os.path.join(model_path, file_name)
+        # file_name = f"{model_prefix}_fold_{fold}.hdf5"
+        # file_path = os.path.join(model_path, file_name)
 
         lrs = [0.001] * 15 + [0.0001] * 25 + [0.00001] * 10
         lr_schd = LearningRateScheduler(lambda ep: lrs[ep], verbose=1)
@@ -268,36 +268,36 @@ if __name__ == "__main__":
                 wmlog_loss_monitor,
             ],
         )
-        model.save_weights(file_path)
+        # model.save_weights(file_path)
 
     # generate oof
-    train_oof = np.zeros((train.shape[0],))
-    train_aucs = []
-    model = build_model()
+    # train_oof = np.zeros((train.shape[0],))
+    # train_aucs = []
+    # model = build_model()
 
-    fold = 0
+    # fold = 0
 
-    for tr_ix, val_ix in KFold(fold_num, shuffle=True, random_state=seed).split(
-        target, target
-    ):
-        fold += 1
-        val = train_df.values[val_ix, :]
-        val_y = target[val_ix]
+    # for tr_ix, val_ix in KFold(fold_num, shuffle=True, random_state=seed).split(
+    #     target, target
+    # ):
+    #     fold += 1
+    #     val = train_df.values[val_ix, :]
+    #     val_y = target[val_ix]
 
-        file_path = f"model_weights/{model_prefix}_fold_{fold}.hdf5"
+    #     file_path = f"model_weights/{model_prefix}_fold_{fold}.hdf5"
 
-        # Predict val + test oofs
-        model.load_weights(file_path)  # load weight with best validation score
+    #     # Predict val + test oofs
+    #     model.load_weights(file_path)  # load weight with best validation score
 
-        pred = model.predict(val, batch_size=batch_size).reshape((len(val_ix),))
-        train_oof[val_ix] += pred
-        val_auc = roc_auc_score(target[val_ix], pred)
-        train_aucs.append(val_auc)
-        print("val acc = {:.5f}".format(val_auc))
+    #     pred = model.predict(val, batch_size=batch_size).reshape((len(val_ix),))
+    #     train_oof[val_ix] += pred
+    #     val_auc = roc_auc_score(target[val_ix], pred)
+    #     train_aucs.append(val_auc)
+    #     print("val acc = {:.5f}".format(val_auc))
 
-    full_auc = roc_auc_score(target, train_oof)
-    print(
-        "CV Mean = {:.5f}, Std = {:.5f}, Overall AUC = {:.5f}".format(
-            np.mean(train_aucs), np.std(train_aucs), full_auc
-        )
-    )
+    # full_auc = roc_auc_score(target, train_oof)
+    # print(
+    #     "CV Mean = {:.5f}, Std = {:.5f}, Overall AUC = {:.5f}".format(
+    #         np.mean(train_aucs), np.std(train_aucs), full_auc
+    #     )
+    # )

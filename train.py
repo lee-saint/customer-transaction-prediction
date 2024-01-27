@@ -3,7 +3,7 @@ import os
 import numpy as np
 import pandas as pd
 
-from sklearn.metrics import roc_auc_score
+from sklearn.metrics import roc_auc_score, log_loss, f1_score
 from sklearn.model_selection import train_test_split
 import tensorflow as tf
 from tensorflow.python.client import device_lib
@@ -11,7 +11,6 @@ import keras.backend as K
 from keras import regularizers
 from keras.callbacks import Callback, LearningRateScheduler
 from keras.layers import *
-from keras.metrics import *
 from keras.models import Model
 from keras.optimizers.legacy import Adam
 
@@ -46,7 +45,11 @@ class AucScoreMonitor(Callback):
 
     def on_epoch_end(self, epoch, logs={}):
         val_pred = self.model.predict(self.val_data).reshape((-1,))
+
         val_score = roc_auc_score(self.val_target, val_pred)
+        loss = log_loss(self.val_target, val_pred)
+        f1 = f1_score(self.val_target, val_pred)
+
         # clip pred
         self.val_scores.append(val_score)
 
@@ -55,6 +58,8 @@ class AucScoreMonitor(Callback):
             step=epoch,
             payload={
                 "auc_score": val_score,
+                "log_loss": loss,
+                "f1_score": f1,
             },
         )
 
@@ -129,7 +134,7 @@ def build_model():
 
 if __name__ == "__main__":
     data_path = os.environ.get("DATA_PATH", "data")
-    model_path = os.environ.get("MODEL_PATH", "model_weights")
+    # model_path = os.environ.get("MODEL_PATH", "model_weights")
 
     train = pd.read_csv(os.path.join(data_path, "train.csv.zip"))
 
@@ -146,15 +151,15 @@ if __name__ == "__main__":
     seed = 0
     train_epochs = 50
     batch_size = 32
-    model_prefix = "nn"
+    # model_prefix = "nn"
 
     tr, val, tr_y, val_y = train_test_split(
         train_df, target, test_size=0.2, random_state=seed
     )
 
     model = build_model()
-    file_name = f"{model_prefix}.keras"
-    file_path = os.path.join(model_path, file_name)
+    # file_name = f"{model_prefix}.keras"
+    # file_path = os.path.join(model_path, file_name)
 
     lrs = [0.001] * 15 + [0.0001] * 25 + [0.00001] * 10
     lr_schd = LearningRateScheduler(lambda ep: lrs[ep], verbose=1)
@@ -183,4 +188,4 @@ if __name__ == "__main__":
             wmlog_loss_monitor,
         ],
     )
-    model.save(file_path, save_format="keras")
+    # model.save(file_path, save_format="keras")

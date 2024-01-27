@@ -48,7 +48,7 @@ class AucScoreMonitor(Callback):
 
         val_score = roc_auc_score(self.val_target, val_pred)
         loss = log_loss(self.val_target, val_pred)
-        f1 = f1_score(self.val_target, val_pred)
+        f1 = f1_score(self.val_target, np.rint(val_pred))
 
         # clip pred
         self.val_scores.append(val_score)

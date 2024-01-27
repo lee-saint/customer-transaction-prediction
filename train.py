@@ -73,7 +73,7 @@ class AucScoreMonitor(Callback):
             self.unimproved_stop_counter = 0
             if self.checkpoint_file is not None:
                 print("Saving file to", self.checkpoint_file)
-                self.model.save_weights(self.checkpoint_file)
+                self.model.save(self.checkpoint_file)
         else:
             if val_score < self.best_val_score:
                 print("no improve from {:.5f}".format(self.best_val_score))
@@ -129,7 +129,7 @@ def build_model():
 
 if __name__ == "__main__":
     data_path = os.environ.get("DATA_PATH", "data")
-    # model_path = os.environ.get("MODEL_PATH", "model_weights")
+    model_path = os.environ.get("MODEL_PATH", "model_weights")
 
     train = pd.read_csv(os.path.join(data_path, "train.csv.zip"))
 
@@ -153,8 +153,8 @@ if __name__ == "__main__":
     )
 
     model = build_model()
-    # file_name = f"{model_prefix}.hdf5"
-    # file_path = os.path.join(model_path, file_name)
+    file_name = f"{model_prefix}.keras"
+    file_path = os.path.join(model_path, file_name)
 
     lrs = [0.001] * 15 + [0.0001] * 25 + [0.00001] * 10
     lr_schd = LearningRateScheduler(lambda ep: lrs[ep], verbose=1)
@@ -183,4 +183,4 @@ if __name__ == "__main__":
             wmlog_loss_monitor,
         ],
     )
-    # model.save_weights(file_path)
+    model.save(file_path, save_format="keras")
